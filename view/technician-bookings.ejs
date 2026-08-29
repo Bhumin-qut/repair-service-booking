@@ -1,0 +1,72 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container tech-bookings-container">
+    <h1 class="page-title">Technician Bookings</h1>
+    <p class="page-subtitle mb-4">Manage your assigned jobs and today's schedule.</p>
+
+    <section class="schedule-box mb-5">
+      <h2 class="schedule-heading">
+        <i class="bi bi-calendar3"></i>
+        Today's Schedule
+      </h2>
+      <% todaySchedule.forEach(function(item) { %>
+        <div class="schedule-item">
+          <div class="schedule-time"><%= item.time %></div>
+          <div class="fw-bold"><%= item.task %></div>
+          <div class="text-muted small"><%= item.detail %></div>
+        </div>
+      <% }); %>
+    </section>
+
+    <section>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="assigned-heading mb-0">Assigned Jobs</h2>
+        <% if (newCount > 0) { %>
+          <span class="new-count-badge"><%= newCount %> NEW</span>
+        <% } %>
+      </div>
+
+      <% assignedJobs.forEach(function(job) { %>
+        <div class="card form-card assigned-card mb-3">
+          <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+              <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                  <span class="id-badge<%= job.status === 'new' ? ' id-badge-request' : '' %>"><%= job.id %></span>
+                  <% if (job.status === 'new') { %>
+                    <span class="time-ago"><i class="bi bi-clock me-1"></i><%= job.timeAgo %></span>
+                  <% } else { %>
+                    <span class="badge-status badge-<%= job.status %>"><%= job.status.replace('-', ' ') %></span>
+                  <% } %>
+                </div>
+                <div class="fw-bold"><%= job.customer %></div>
+                <div class="text-muted"><%= job.device %></div>
+                <div class="text-muted"><%= job.issue %></div>
+                <% if (job.location) { %>
+                  <div class="text-muted small mt-1">
+                    <i class="bi bi-geo-alt me-1"></i><%= job.location %>
+                  </div>
+                <% } %>
+              </div>
+              <div class="d-flex flex-wrap align-items-start gap-2 assigned-actions">
+                <% if (job.status === 'new') { %>
+                  <form action="/technician/bookings/<%= job.id %>/accept" method="POST">
+                    <button type="submit" class="btn btn-brand">Accept Job</button>
+                  </form>
+                  <form action="/technician/bookings/<%= job.id %>/reject" method="POST">
+                    <button type="submit" class="btn btn-reject-request">Reject Request</button>
+                  </form>
+                <% } else if (job.status === 'in-progress') { %>
+                  <a href="/technician/bookings/<%= job.id %>" class="btn btn-view-details">View Details</a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </section>
+  </div>
+</main>
+
+<%- include('footer') %>

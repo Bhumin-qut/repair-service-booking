@@ -1,0 +1,29 @@
+{
+  "name": "repair-service-booking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bhumin-qut/repair-service-booking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bhumin-qut/repair-service-booking/issues"
+  },
+  "homepage": "https://github.com/Bhumin-qut/repair-service-booking#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "mongodb": "^7.6.0",
+    "multer": "^2.2.0",
+    "path": "^0.12.7"
+  }
+}

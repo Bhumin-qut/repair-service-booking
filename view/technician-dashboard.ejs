@@ -1,0 +1,149 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container tech-bookings-container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle mb-2">Welcome back, <%= user.fullName %>. Here's an overview of your repair jobs.</p>
+        <span class="badge-status badge-<%= user.availability === 'available' ? 'in-progress' : (user.availability === 'busy' ? 'pending' : 'cancelled') %>">
+          <%= user.availability === 'on-leave' ? 'On Leave' : ((user.availability || 'available').charAt(0).toUpperCase() + (user.availability || 'available').slice(1)) %>
+        </span>
+      </div>
+      <a href="/technician/bookings" class="btn btn-brand text-nowrap">View All Jobs</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card form-card stat-card h-100">
+          <div class="card-body">
+            <div class="stat-label">New Requests</div>
+            <div class="stat-value text-primary"><%= stats.newCount %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card form-card stat-card h-100">
+          <div class="card-body">
+            <div class="stat-label">In Progress</div>
+            <div class="stat-value"><%= stats.inProgressCount %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card form-card stat-card h-100">
+          <div class="card-body">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value"><%= stats.completedCount %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card form-card stat-card h-100">
+          <div class="card-body">
+            <div class="stat-label">Today's Schedule</div>
+            <div class="stat-value"><%= stats.scheduleCount %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <section class="schedule-box h-100">
+          <h2 class="schedule-heading">
+            <i class="bi bi-calendar3"></i>
+            Today's Schedule
+          </h2>
+          <% if (todaySchedule.length === 0) { %>
+            <p class="text-muted mb-0">No jobs scheduled for today.</p>
+          <% } %>
+          <% todaySchedule.forEach(function(item) { %>
+            <div class="schedule-item">
+              <div class="schedule-time"><%= item.time %></div>
+              <div class="fw-bold"><%= item.task %></div>
+              <div class="text-muted small"><%= item.detail %></div>
+            </div>
+          <% }); %>
+        </section>
+      </div>
+      <div class="col-lg-7">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="assigned-heading mb-0">Needs Attention</h2>
+          <% if (stats.newCount > 0) { %>
+            <span class="new-count-badge"><%= stats.newCount %> NEW</span>
+          <% } %>
+        </div>
+        <% if (newJobs.length === 0) { %>
+          <div class="card form-card">
+            <div class="card-body text-muted">No new job requests right now.</div>
+          </div>
+        <% } %>
+        <% newJobs.forEach(function(job) { %>
+          <div class="card form-card assigned-card mb-3">
+            <div class="card-body p-3">
+              <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+                <div>
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="id-badge id-badge-request"><%= job.id %></span>
+                    <span class="time-ago"><i class="bi bi-clock me-1"></i><%= job.timeAgo %></span>
+                  </div>
+                  <div class="fw-bold"><%= job.customer %></div>
+                  <div class="text-muted"><%= job.device %></div>
+                  <div class="text-muted"><%= job.issue %></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-start gap-2 assigned-actions">
+                  <form action="/technician/bookings/<%= job.id %>/accept" method="POST">
+                    <button type="submit" class="btn btn-brand">Accept</button>
+                  </form>
+                  <form action="/technician/bookings/<%= job.id %>/reject" method="POST">
+                    <button type="submit" class="btn btn-reject-request">Reject</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <section>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="assigned-heading mb-0">Active Jobs</h2>
+        <a href="/technician/bookings" class="table-action">See all</a>
+      </div>
+      <% if (activeJobs.length === 0) { %>
+        <div class="card form-card">
+          <div class="card-body text-muted">No jobs currently in progress.</div>
+        </div>
+      <% } %>
+      <% activeJobs.forEach(function(job) { %>
+        <div class="card form-card assigned-card mb-3">
+          <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+              <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                  <span class="id-badge"><%= job.id %></span>
+                  <span class="badge-status badge-<%= job.status %>"><%= job.status.replace('-', ' ') %></span>
+                </div>
+                <div class="fw-bold"><%= job.customer %></div>
+                <div class="text-muted"><%= job.device %></div>
+                <div class="text-muted"><%= job.issue %></div>
+                <% if (job.location) { %>
+                  <div class="text-muted small mt-1">
+                    <i class="bi bi-geo-alt me-1"></i><%= job.location %>
+                  </div>
+                <% } %>
+              </div>
+              <div class="assigned-actions">
+                <a href="/technician/bookings/<%= job.id %>" class="btn btn-view-details">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </section>
+  </div>
+</main>
+
+<%- include('footer') %>

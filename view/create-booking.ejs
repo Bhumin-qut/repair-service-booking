@@ -1,0 +1,65 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container booking-container">
+    <h1 class="page-title">Create New Booking</h1>
+    <p class="page-subtitle mb-4">Enter the details of your device and the issue you're experiencing.</p>
+
+    <form action="/book-repair" method="POST">
+      <div class="card form-card section-card">
+        <div class="card-body p-4">
+          <h2 class="section-title">Scheduling</h2>
+          <div class="row g-3 mb-2">
+            <div class="col-md-6">
+              <label for="preferredDate" class="form-label">Preferred Date</label>
+              <input type="date" class="form-control" id="preferredDate" name="preferredDate" required>
+            </div>
+            <div class="col-md-6">
+              <label for="preferredTime" class="form-label">Preferred Time</label>
+              <input type="time" class="form-control" id="preferredTime" name="preferredTime" required>
+            </div>
+          </div>
+
+          <h2 class="section-title mt-4">Device Information</h2>
+          <div class="row g-3 mb-2">
+            <div class="col-md-6">
+              <label for="deviceName" class="form-label">Device Name</label>
+              <input type="text" class="form-control" id="deviceName" name="deviceName" placeholder="e.g. iPhone 13 Pro" required>
+            </div>
+            <div class="col-md-6">
+              <label for="deviceBrand" class="form-label">Device Brand</label>
+              <select class="form-select" id="deviceBrand" name="deviceBrand" required>
+                <option value="" selected disabled>Select Brand</option>
+                <% brands.forEach(function(brand) { %>
+                  <option value="<%= brand %>"><%= brand %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="serviceCategory" class="form-label">Service Category</label>
+              <select class="form-select" id="serviceCategory" name="serviceCategory" required>
+                <option value="" selected disabled>Select Category</option>
+                <% categories.forEach(function(category) { %>
+                  <option value="<%= category %>"><%= category %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+
+          <h2 class="section-title mt-4">Issue Details</h2>
+          <div class="mb-4">
+            <label for="problemDescription" class="form-label">Problem Description</label>
+            <textarea class="form-control" id="problemDescription" name="problemDescription" rows="5" placeholder="Please describe the issue in detail..." required></textarea>
+          </div>
+
+          <div class="d-flex justify-content-end align-items-center gap-3">
+            <button type="reset" class="btn btn-cancel">Cancel</button>
+            <button type="submit" class="btn btn-brand">Confirm Booking</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('footer') %>

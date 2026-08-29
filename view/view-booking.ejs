@@ -1,0 +1,56 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container booking-container">
+    <a href="/bookings" class="back-link d-inline-block mb-3">&larr; Back to Booking History</a>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+      <h1 class="page-title mb-0">Booking #<%= booking.id %></h1>
+      <span class="badge-status badge-<%= booking.status %>">
+        <%= booking.status.replace('-', ' ') %>
+      </span>
+    </div>
+    <p class="page-subtitle mb-4">Review the details of your repair service.</p>
+
+    <div class="card form-card section-card">
+      <div class="card-body p-4">
+        <div class="device-info-box mb-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-label mb-1">Device Type</div>
+              <div class="fw-semibold"><%= booking.deviceType %></div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-label mb-1">Brand &amp; Model</div>
+              <div class="fw-semibold"><%= booking.deviceName %></div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Booking Details</h2>
+        <div class="mb-4">
+          <div class="form-label mb-1">Problem Description</div>
+          <p class="mb-0"><%= booking.problemDescription %></p>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-label mb-1">Booking Date</div>
+            <div><%= booking.displayDate %></div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-label mb-1">Preferred Time</div>
+            <div><%= booking.time %></div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center gap-3 mt-4">
+          <a href="/bookings" class="btn btn-cancel">Back</a>
+          <% if (canEdit) { %>
+            <a href="/bookings/<%= booking.id %>/edit" class="btn btn-brand">Edit Booking</a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('footer') %>

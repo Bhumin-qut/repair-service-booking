@@ -1,0 +1,71 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container">
+    <div class="card form-card register-card mx-auto">
+      <div class="card-body p-4 p-md-5">
+        <h1 class="page-title text-center">Create an Account</h1>
+        <p class="page-subtitle text-center mb-4">Join Repair Service Booking to start booking and managing your repairs.</p>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="alert alert-danger" role="alert"><%= error %></div>
+        <% } %>
+
+        <form action="/register" method="POST">
+          <fieldset class="form-fieldset">
+            <legend>Account Information</legend>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="johndoe123" required>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="john@example.com" required>
+              </div>
+              <div class="col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+              </div>
+              <div class="col-md-6">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-fieldset">
+            <legend>Personal Details</legend>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="John" required>
+              </div>
+              <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Doe" required>
+              </div>
+              <div class="col-12">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="(555) 123-4567" required>
+              </div>
+              <div class="col-12">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="123 Main St, City, State, ZIP" required></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="text-center mt-2">
+            <button type="submit" class="btn btn-brand btn-create">Create Account</button>
+            <p class="form-footer-text mt-3 mb-0">
+              Already have an account? <a href="/login">Log in</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('footer') %>

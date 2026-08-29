@@ -1,0 +1,74 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container job-container">
+    <a href="/technician/dashboard" class="back-link d-inline-block mb-3">&larr; Back to Dashboard</a>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <h1 class="page-title mb-1">Job #<%= job.id %></h1>
+        <p class="page-subtitle mb-0">Reviewing repair details for <%= job.deviceName %>.</p>
+      </div>
+      <span class="badge-status badge-<%= job.status %> job-status-badge">
+        <i class="bi bi-wrench-adjustable me-1"></i>
+        <%= job.status.replace('-', ' ') %>
+      </span>
+    </div>
+
+    <div class="card form-card mb-4">
+      <div class="card-body p-4">
+        <h2 class="job-card-title">Diagnostic Information</h2>
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="form-label mb-1">Customer</div>
+            <div class="fw-semibold"><%= job.customer.name %></div>
+            <div class="text-muted small"><%= job.customer.email %></div>
+            <div class="text-muted small"><%= job.customer.phone %></div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-label mb-1">Device Model</div>
+            <div class="fw-semibold">
+              <i class="bi bi-phone me-1"></i>
+              <%= job.deviceBrand %> <%= job.deviceName %>
+            </div>
+            <div class="text-muted small">Serial: <%= job.serialNumber %></div>
+          </div>
+        </div>
+        <div class="form-label mb-2">Reported Problem</div>
+        <div class="reported-problem"><%= job.reportedProblem %></div>
+      </div>
+    </div>
+
+    <form action="/technician/bookings/<%= job.id %>" method="POST">
+      <div class="card form-card mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="job-card-title mb-0">Technician Notes</h2>
+            <i class="bi bi-pencil notes-edit-icon"></i>
+          </div>
+          <label for="notes" class="form-label mt-3">Internal Repair Log</label>
+          <textarea class="form-control" id="notes" name="notes" rows="5" placeholder="Enter findings, parts used, or testing results here..."><%= job.notes %></textarea>
+        </div>
+      </div>
+
+      <div class="card status-update-card mb-2">
+        <div class="card-body p-4">
+          <h2 class="job-card-title">Job Status Update</h2>
+          <label for="status" class="form-label">Current State</label>
+          <select class="form-select mb-4" id="status" name="status">
+            <% jobStatuses.forEach(function(item) { %>
+              <option value="<%= item.value %>" <%= item.value === job.status ? 'selected' : '' %>><%= item.label %></option>
+            <% }); %>
+          </select>
+          <button type="submit" name="action" value="complete" class="btn btn-brand btn-complete w-100">
+            <i class="bi bi-check-circle me-2"></i>
+            Mark as Completed
+          </button>
+          <p class="text-muted text-center small mt-2 mb-0">This will notify the customer.</p>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('footer') %>

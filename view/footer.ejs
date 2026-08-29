@@ -1,0 +1,24 @@
+  <footer class="site-footer mt-auto">
+    <div class="container-fluid px-4 px-md-5 py-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-wrench-adjustable-circle brand-icon"></i>
+            <span class="brand-name">Repair Service Booking</span>
+          </div>
+          <p class="footer-copy mb-0">&copy; 2024 Repair Service Booking Repair Services. All rights reserved.</p>
+        </div>
+        <% if (typeof user !== 'undefined' && user && user.role === 'technician') { %>
+          <div class="footer-links d-flex flex-wrap gap-3">
+            <a href="#">Help Center</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Contact Support</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </footer>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

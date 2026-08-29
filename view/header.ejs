@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Repair Service Booking</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <header class="site-header">
+    <nav class="navbar navbar-expand-md bg-white border-bottom py-3">
+      <div class="container-fluid px-4 px-md-5">
+        <a class="navbar-brand d-flex align-items-center gap-2 mb-0" href="/">
+          <i class="bi bi-wrench-adjustable-circle brand-icon"></i>
+          <span class="brand-name">Repair Service Booking</span>
+        </a>
+        <% const authenticated = typeof user !== 'undefined' && user; %>
+        <% const page = typeof currentPage !== 'undefined' ? currentPage : ''; %>
+        <% if (authenticated) { %>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-md-center gap-md-3">
+              <% if (user.role === 'technician') { %>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'dashboard' ? ' active' : '' %>" href="/technician/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'bookings' ? ' active' : '' %>" href="/technician/bookings">My Bookings</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'profile' ? ' active' : '' %>" href="/technician/profile">Profile</a>
+                </li>
+              <% } else { %>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'book-repair' ? ' active' : '' %>" href="/book-repair">Book Repair</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'bookings' ? ' active' : '' %>" href="/bookings">My Bookings</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link<%= page === 'profile' ? ' active' : '' %>" href="/profile">Profile</a>
+                </li>
+              <% } %>
+              <li class="nav-item">
+                <a class="nav-link nav-link-signin" href="/logout">Sign Out</a>
+              </li>
+            </ul>
+          </div>
+        <% } else { %>
+          <a href="/login" class="nav-link-signin">Sign In</a>
+        <% } %>
+      </div>
+    </nav>
+  </header>

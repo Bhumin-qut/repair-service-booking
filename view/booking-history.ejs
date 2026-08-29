@@ -1,0 +1,106 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container history-container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+      <div>
+        <h1 class="page-title">Booking History</h1>
+        <p class="page-subtitle mb-0">Review and manage your past and current repair requests.</p>
+      </div>
+      <a href="/book-repair" class="btn btn-brand text-nowrap">+ New Booking</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-8">
+        <label for="bookingSearch" class="form-label">Search</label>
+        <div class="input-icon">
+          <i class="bi bi-search"></i>
+          <input type="search" class="form-control" id="bookingSearch" placeholder="Search by ID or Device...">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <label for="statusFilter" class="form-label">Status</label>
+        <select class="form-select" id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="in-progress">In Progress</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card form-card">
+      <div class="table-responsive">
+        <table class="table bookings-table mb-0">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Device &amp; Category</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(booking) { %>
+              <tr class="<%= booking.status === 'cancelled' ? 'row-cancelled' : '' %>" data-search="<%= (booking.id + ' ' + booking.deviceName).toLowerCase() %>" data-status="<%= booking.status %>">
+                <td class="booking-id">#<%= booking.id %></td>
+                <td>
+                  <div class="device-name"><%= booking.deviceName %></div>
+                  <div class="device-category"><%= booking.category %></div>
+                </td>
+                <td><%= booking.displayDate %></td>
+                <td>
+                  <span class="badge-status badge-<%= booking.status %>">
+                    <%= booking.status.replace('-', ' ') %>
+                  </span>
+                </td>
+                <td>
+                  <% if (booking.status === 'pending' || booking.status === 'in-progress') { %>
+                    <a href="/bookings/<%= booking.id %>" class="table-action">View / Edit</a>
+                  <% } else { %>
+                    <a href="/bookings/<%= booking.id %>" class="table-action table-action-muted">View Details</a>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+            <tr id="emptyRow" hidden>
+              <td colspan="5" class="text-center text-muted py-4">No bookings found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  (function () {
+    const search = document.getElementById('bookingSearch');
+    const status = document.getElementById('statusFilter');
+    const rows = Array.from(document.querySelectorAll('tbody tr[data-status]'));
+    const emptyRow = document.getElementById('emptyRow');
+
+    function filterRows() {
+      const query = (search.value || '').toLowerCase().trim();
+      const selected = status.value;
+      let visible = 0;
+
+      rows.forEach(function (row) {
+        const matchesQuery = !query || row.dataset.search.indexOf(query) !== -1;
+        const matchesStatus = !selected || row.dataset.status === selected;
+        const show = matchesQuery && matchesStatus;
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+
+      emptyRow.hidden = visible > 0;
+    }
+
+    search.addEventListener('input', filterRows);
+    status.addEventListener('change', filterRows);
+  })();
+</script>
+
+<%- include('footer') %>

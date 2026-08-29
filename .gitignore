@@ -70,6 +70,10 @@ web_modules/
 .env.*
 !.env.example
 
+# Uploaded profile photos
+public/uploads/technicians/*
+!public/uploads/technicians/.gitkeep
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

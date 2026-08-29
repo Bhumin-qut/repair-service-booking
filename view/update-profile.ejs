@@ -1,0 +1,74 @@
+<%- include('header') %>
+
+<main class="page-main flex-grow-1 py-4 py-md-5">
+  <div class="container profile-container">
+    <h1 class="page-title">Update Profile</h1>
+    <p class="page-subtitle mb-4">Manage your account information and personal details.</p>
+
+    <form action="/profile" method="POST">
+      <div class="card form-card section-card mb-4">
+        <div class="card-body p-4">
+          <h2 class="section-title">Account Information</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" value="<%= user.username %>" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
+            </div>
+          </div>
+
+          <hr class="dotted-divider">
+
+          <h3 class="subsection-title">Change Password</h3>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="newPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="col-md-6">
+              <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card form-card section-card mb-4">
+        <div class="card-body p-4">
+          <h2 class="section-title">Personal Details</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" name="firstName" value="<%= user.firstName %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" name="lastName" value="<%= user.lastName %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone %>" required>
+            </div>
+            <div class="col-12">
+              <label for="address" class="form-label">Service Address</label>
+              <textarea class="form-control" id="address" name="address" rows="3" required><%= user.address %></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="actions-divider">
+      <div class="d-flex justify-content-end align-items-center gap-3">
+        <button type="reset" class="btn btn-cancel">Cancel</button>
+        <button type="submit" class="btn btn-brand">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('footer') %>
