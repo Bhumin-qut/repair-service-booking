@@ -15,6 +15,10 @@
       </span>
     </div>
 
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } %>
+
     <div class="card form-card mb-4">
       <div class="card-body p-4">
         <h2 class="job-card-title">Diagnostic Information</h2>
@@ -39,7 +43,7 @@
       </div>
     </div>
 
-    <form action="/technician/bookings/<%= job.id %>" method="POST">
+    <form action="/technician/bookings/<%= job.id %>" method="POST" class="needs-validation" novalidate>
       <div class="card form-card mb-4">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center">
@@ -47,7 +51,8 @@
             <i class="bi bi-pencil notes-edit-icon"></i>
           </div>
           <label for="notes" class="form-label mt-3">Internal Repair Log</label>
-          <textarea class="form-control" id="notes" name="notes" rows="5" placeholder="Enter findings, parts used, or testing results here..."><%= job.notes %></textarea>
+          <textarea class="form-control" id="notes" name="notes" rows="5" maxlength="2000" placeholder="Enter findings, parts used, or testing results here..."><%= job.notes %></textarea>
+          <div class="form-text">Maximum 2000 characters.</div>
         </div>
       </div>
 
@@ -55,11 +60,12 @@
         <div class="card-body p-4">
           <h2 class="job-card-title">Job Status Update</h2>
           <label for="status" class="form-label">Current State</label>
-          <select class="form-select mb-4" id="status" name="status">
+          <select class="form-select mb-4" id="status" name="status" required>
             <% jobStatuses.forEach(function(item) { %>
               <option value="<%= item.value %>" <%= item.value === job.status ? 'selected' : '' %>><%= item.label %></option>
             <% }); %>
           </select>
+          <div class="invalid-feedback mb-3">Select a valid job status.</div>
           <button type="submit" name="action" value="complete" class="btn btn-brand btn-complete w-100">
             <i class="bi bi-check-circle me-2"></i>
             Mark as Completed

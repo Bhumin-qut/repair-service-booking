@@ -6,7 +6,11 @@
     <h1 class="page-title">Update Booking #<%= booking.id %></h1>
     <p class="page-subtitle mb-4">Modify the details for your upcoming repair service.</p>
 
-    <form action="/bookings/<%= booking.id %>" method="POST">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } %>
+
+    <form action="/bookings/<%= booking.id %>" method="POST" class="needs-validation" novalidate>
       <div class="card form-card section-card">
         <div class="card-body p-4">
           <div class="device-info-box mb-4">
@@ -25,15 +29,17 @@
           <h2 class="section-title">Modify Details</h2>
           <div class="mb-3">
             <label for="problemDescription" class="form-label">Problem Description</label>
-            <textarea class="form-control" id="problemDescription" name="problemDescription" rows="5" required><%= booking.problemDescription %></textarea>
+            <textarea class="form-control" id="problemDescription" name="problemDescription" rows="5" minlength="10" maxlength="1000" required><%= booking.problemDescription %></textarea>
+            <div class="invalid-feedback">Describe the problem in at least 10 characters.</div>
           </div>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
               <label for="bookingDate" class="form-label">Booking Date</label>
               <div class="input-icon">
                 <i class="bi bi-calendar3"></i>
-                <input type="date" class="form-control" id="bookingDate" name="bookingDate" value="<%= booking.date %>" required>
+                <input type="date" class="form-control" id="bookingDate" name="bookingDate" value="<%= booking.date %>" data-min-today required>
               </div>
+              <div class="invalid-feedback">Select a date that is today or later.</div>
             </div>
             <div class="col-md-6">
               <label for="preferredTime" class="form-label">Preferred Time</label>
@@ -45,6 +51,7 @@
                   <% }); %>
                 </select>
               </div>
+              <div class="invalid-feedback">Select a preferred time.</div>
             </div>
           </div>
 

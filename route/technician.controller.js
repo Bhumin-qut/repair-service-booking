@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { getCollection, hashPassword } = require('../db/config');
-const { timeAgo } = require('../helper/helperLib');
+const { timeAgo, trim, validateTechnicianProfile, validateJobUpdate } = require('../helper/helperLib');
 
 const specializations = [
   'Laptop & PC Repair',
@@ -143,7 +143,8 @@ exports.getProfile = async (req, res) => {
     return res.render('update-technician-profile', technicianLocals(technician, {
       title: 'Update Technician Profile',
       currentPage: 'profile',
-      specializations
+      specializations,
+      error: null
     }));
   } catch (error) {
     console.error('Load technician profile failed:', error);
@@ -167,20 +168,37 @@ exports.updateProfile = async (req, res) => {
       confirmPassword
     } = req.body;
 
+    const profileError = validateTechnicianProfile(req.body, specializations);
+    if (profileError) {
+      if (req.file) {
+        deletePhotoFile(`/uploads/technicians/${req.file.filename}`);
+      }
+      return res.render('update-technician-profile', technicianLocals(Object.assign({}, technician, {
+        fullName: trim(fullName),
+        phone: trim(phone),
+        specialization,
+        experience: Number(experience),
+        availability,
+        address: trim(address)
+      }), {
+        title: 'Update Technician Profile',
+        currentPage: 'profile',
+        specializations,
+        error: profileError
+      }));
+    }
+
     const update = {
-      fullName: fullName || technician.fullName,
-      phone: phone || technician.phone,
+      fullName: trim(fullName) || technician.fullName,
+      phone: trim(phone) || technician.phone,
       specialization: specialization || technician.specialization,
       experience: experience ? Number(experience) : technician.experience,
       availability: availability || technician.availability,
-      address: address || technician.address,
+      address: trim(address) || technician.address,
       updatedAt: new Date()
     };
 
     if (newPassword) {
-      if (newPassword !== confirmPassword) {
-        return res.status(400).send('Passwords do not match.');
-      }
       update.passwordHash = hashPassword(newPassword);
     }
 
@@ -302,7 +320,8 @@ exports.getJob = async (req, res) => {
       title: `Job #${job.id}`,
       currentPage: 'bookings',
       job: toJobView(job),
-      jobStatuses
+      jobStatuses,
+      error: null
     }));
   } catch (error) {
     console.error('Load job failed:', error);
@@ -319,12 +338,24 @@ exports.updateJob = async (req, res) => {
       return res.status(404).send('Job not found');
     }
 
+    const allowedStatuses = jobStatuses.map((item) => item.value);
+    const jobError = validateJobUpdate(req.body, allowedStatuses);
+    if (jobError) {
+      return res.render('update-repair-details', technicianLocals(req.user, {
+        title: `Job #${job.id}`,
+        currentPage: 'bookings',
+        job: Object.assign({}, toJobView(job), { notes: req.body.notes, status: req.body.status || job.status }),
+        jobStatuses,
+        error: jobError
+      }));
+    }
+
     const status = req.body.action === 'complete' ? 'completed' : req.body.status;
     await jobs.updateOne(
       { id: job.id },
       {
         $set: {
-          notes: req.body.notes || '',
+          notes: trim(req.body.notes),
           status,
           updatedAt: new Date()
         }

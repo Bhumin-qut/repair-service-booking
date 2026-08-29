@@ -1,22 +1,29 @@
 <%- include('header') %>
+<% const form = typeof values !== 'undefined' ? values : {}; %>
 
 <main class="page-main flex-grow-1 py-4 py-md-5">
   <div class="container booking-container">
     <h1 class="page-title">Create New Booking</h1>
     <p class="page-subtitle mb-4">Enter the details of your device and the issue you're experiencing.</p>
 
-    <form action="/book-repair" method="POST">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } %>
+
+    <form action="/book-repair" method="POST" class="needs-validation" novalidate>
       <div class="card form-card section-card">
         <div class="card-body p-4">
           <h2 class="section-title">Scheduling</h2>
           <div class="row g-3 mb-2">
             <div class="col-md-6">
               <label for="preferredDate" class="form-label">Preferred Date</label>
-              <input type="date" class="form-control" id="preferredDate" name="preferredDate" required>
+              <input type="date" class="form-control" id="preferredDate" name="preferredDate" value="<%= form.preferredDate || '' %>" data-min-today required>
+              <div class="invalid-feedback">Select a date that is today or later.</div>
             </div>
             <div class="col-md-6">
               <label for="preferredTime" class="form-label">Preferred Time</label>
-              <input type="time" class="form-control" id="preferredTime" name="preferredTime" required>
+              <input type="time" class="form-control" id="preferredTime" name="preferredTime" value="<%= form.preferredTime || '' %>" required>
+              <div class="invalid-feedback">Preferred time is required.</div>
             </div>
           </div>
 
@@ -24,32 +31,36 @@
           <div class="row g-3 mb-2">
             <div class="col-md-6">
               <label for="deviceName" class="form-label">Device Name</label>
-              <input type="text" class="form-control" id="deviceName" name="deviceName" placeholder="e.g. iPhone 13 Pro" required>
+              <input type="text" class="form-control" id="deviceName" name="deviceName" placeholder="e.g. iPhone 13 Pro" value="<%= form.deviceName || '' %>" minlength="2" maxlength="80" required>
+              <div class="invalid-feedback">Device name is required.</div>
             </div>
             <div class="col-md-6">
               <label for="deviceBrand" class="form-label">Device Brand</label>
               <select class="form-select" id="deviceBrand" name="deviceBrand" required>
-                <option value="" selected disabled>Select Brand</option>
+                <option value="" <%= form.deviceBrand ? '' : 'selected' %> disabled>Select Brand</option>
                 <% brands.forEach(function(brand) { %>
-                  <option value="<%= brand %>"><%= brand %></option>
+                  <option value="<%= brand %>" <%= form.deviceBrand === brand ? 'selected' : '' %>><%= brand %></option>
                 <% }); %>
               </select>
+              <div class="invalid-feedback">Select a device brand.</div>
             </div>
             <div class="col-12">
               <label for="serviceCategory" class="form-label">Service Category</label>
               <select class="form-select" id="serviceCategory" name="serviceCategory" required>
-                <option value="" selected disabled>Select Category</option>
+                <option value="" <%= form.serviceCategory ? '' : 'selected' %> disabled>Select Category</option>
                 <% categories.forEach(function(category) { %>
-                  <option value="<%= category %>"><%= category %></option>
+                  <option value="<%= category %>" <%= form.serviceCategory === category ? 'selected' : '' %>><%= category %></option>
                 <% }); %>
               </select>
+              <div class="invalid-feedback">Select a service category.</div>
             </div>
           </div>
 
           <h2 class="section-title mt-4">Issue Details</h2>
           <div class="mb-4">
             <label for="problemDescription" class="form-label">Problem Description</label>
-            <textarea class="form-control" id="problemDescription" name="problemDescription" rows="5" placeholder="Please describe the issue in detail..." required></textarea>
+            <textarea class="form-control" id="problemDescription" name="problemDescription" rows="5" placeholder="Please describe the issue in detail..." minlength="10" maxlength="1000" required><%= form.problemDescription || '' %></textarea>
+            <div class="invalid-feedback">Describe the problem in at least 10 characters.</div>
           </div>
 
           <div class="d-flex justify-content-end align-items-center gap-3">

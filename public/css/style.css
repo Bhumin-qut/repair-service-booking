@@ -82,6 +82,14 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(21, 101, 192, 0.15);
 }
 
+.invalid-feedback {
+  font-size: 0.8rem;
+}
+
+.was-validated .input-icon:has(:invalid) + .invalid-feedback {
+  display: block;
+}
+
 .form-fieldset {
   border: 1px solid #dee2e6;
   border-radius: 0.5rem;

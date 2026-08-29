@@ -5,7 +5,11 @@
     <h1 class="page-title">Update Technician Profile</h1>
     <p class="page-subtitle mb-4">Manage your personal information and service details.</p>
 
-    <form action="/technician/profile" method="POST" enctype="multipart/form-data">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } %>
+
+    <form action="/technician/profile" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
       <div class="card form-card">
         <div class="card-body p-4">
           <h2 class="tech-section-title">
@@ -23,6 +27,7 @@
               <input type="hidden" id="removePhoto" name="removePhoto" value="">
               <button type="button" class="btn btn-upload-new me-2" id="uploadPhotoBtn">Upload New</button>
               <button type="button" class="btn btn-remove-photo" id="removePhotoBtn">Remove</button>
+              <div class="text-danger small mt-2" id="photoError"></div>
             </div>
           </div>
 
@@ -33,7 +38,8 @@
           <div class="row g-3">
             <div class="col-12">
               <label for="fullName" class="form-label">Full Name</label>
-              <input type="text" class="form-control" id="fullName" name="fullName" value="<%= user.fullName %>" required>
+              <input type="text" class="form-control" id="fullName" name="fullName" value="<%= user.fullName %>" minlength="2" maxlength="80" required>
+              <div class="invalid-feedback">Full name is required.</div>
             </div>
             <div class="col-md-6">
               <label for="email" class="form-label">Email Address</label>
@@ -41,7 +47,8 @@
             </div>
             <div class="col-md-6">
               <label for="phone" class="form-label">Phone Number</label>
-              <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone %>" required>
+              <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone %>" pattern="[0-9+()\-\s]{8,20}" required>
+              <div class="invalid-feedback">Enter a valid phone number.</div>
             </div>
           </div>
 
@@ -57,15 +64,17 @@
                   <option value="<%= item %>" <%= item === user.specialization ? 'selected' : '' %>><%= item %></option>
                 <% }); %>
               </select>
+              <div class="invalid-feedback">Select a specialization.</div>
             </div>
             <div class="col-md-6">
               <label for="experience" class="form-label">Experience (Years)</label>
-              <input type="number" class="form-control" id="experience" name="experience" min="0" max="50" value="<%= user.experience %>" required>
+              <input type="number" class="form-control" id="experience" name="experience" min="0" max="50" step="1" value="<%= user.experience %>" required>
+              <div class="invalid-feedback">Enter experience between 0 and 50 years.</div>
             </div>
             <div class="col-12">
               <div class="form-label">Availability Status</div>
               <div class="availability-group">
-                <input type="radio" class="btn-check" name="availability" id="statusAvailable" value="available" <%= user.availability === 'available' ? 'checked' : '' %>>
+                <input type="radio" class="btn-check" name="availability" id="statusAvailable" value="available" <%= user.availability === 'available' ? 'checked' : '' %> required>
                 <label class="btn btn-availability" for="statusAvailable">Available</label>
 
                 <input type="radio" class="btn-check" name="availability" id="statusBusy" value="busy" <%= user.availability === 'busy' ? 'checked' : '' %>>
@@ -83,7 +92,8 @@
           </h2>
           <div class="mb-1">
             <label for="address" class="form-label">Service Area / Home Address</label>
-            <textarea class="form-control" id="address" name="address" rows="3" required><%= user.address %></textarea>
+            <textarea class="form-control" id="address" name="address" rows="3" minlength="5" maxlength="300" required><%= user.address %></textarea>
+            <div class="invalid-feedback">Address is required.</div>
           </div>
 
           <h2 class="tech-section-title">
@@ -93,11 +103,13 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label for="newPassword" class="form-label">New Password</label>
-              <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="••••••••">
+              <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="••••••••" minlength="8" maxlength="72" data-match-password>
+              <div class="invalid-feedback">Password must be at least 8 characters.</div>
             </div>
             <div class="col-md-6">
               <label for="confirmPassword" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="••••••••">
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="••••••••" minlength="8" maxlength="72" data-match-confirm>
+              <div class="invalid-feedback">Passwords must match.</div>
             </div>
           </div>
 

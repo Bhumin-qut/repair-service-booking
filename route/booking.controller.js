@@ -1,5 +1,5 @@
 const { getCollection } = require('../db/config');
-const { formatDate, formatTime, toCustomerView } = require('../helper/helperLib');
+const { formatDate, formatTime, toCustomerView, trim, validateCreateBooking, validateUpdateBooking } = require('../helper/helperLib');
 
 const brands = [
   'Apple',
@@ -59,7 +59,9 @@ exports.getCreateBooking = async (req, res) => {
       currentPage: 'book-repair',
       user: toCustomerView(user),
       brands,
-      categories
+      categories,
+      error: null,
+      values: {}
     });
   } catch (error) {
     console.error('Load create booking failed:', error);
@@ -81,19 +83,32 @@ exports.createBooking = async (req, res) => {
       problemDescription
     } = req.body;
 
+    const bookingError = validateCreateBooking(req.body, brands, categories);
+    if (bookingError) {
+      return res.render('create-booking', {
+        title: 'Create New Booking',
+        currentPage: 'book-repair',
+        user: toCustomerView(user),
+        brands,
+        categories,
+        error: bookingError,
+        values: req.body
+      });
+    }
+
     const bookingId = `REP-${Math.floor(1000 + Math.random() * 9000)}`;
     const booking = {
       id: bookingId,
       customerEmail: user.email,
       deviceType: 'Device',
-      deviceName,
+      deviceName: trim(deviceName),
       brand: deviceBrand,
       category: serviceCategory,
       date: preferredDate,
       displayDate: formatDate(preferredDate),
       time: formatTime(preferredTime),
       status: 'pending',
-      problemDescription,
+      problemDescription: trim(problemDescription),
       createdAt: new Date()
     };
 
@@ -182,7 +197,8 @@ exports.getUpdateBooking = async (req, res) => {
     return res.render('update-booking', authLocals(user, {
       title: `Update Booking #${booking.id}`,
       booking,
-      timeSlots
+      timeSlots,
+      error: null
     }));
   } catch (error) {
     console.error('Load update booking failed:', error);
@@ -204,12 +220,26 @@ exports.updateBooking = async (req, res) => {
       return res.status(404).send('Booking not found');
     }
 
+    const updateError = validateUpdateBooking(req.body, timeSlots);
+    if (updateError) {
+      return res.render('update-booking', authLocals(user, {
+        title: `Update Booking #${booking.id}`,
+        booking: Object.assign({}, booking, {
+          problemDescription: req.body.problemDescription,
+          date: req.body.bookingDate,
+          time: req.body.preferredTime
+        }),
+        timeSlots,
+        error: updateError
+      }));
+    }
+
     if (canEdit(booking)) {
       await getCollection('bookings').updateOne(
         { id: booking.id },
         {
           $set: {
-            problemDescription: req.body.problemDescription,
+            problemDescription: trim(req.body.problemDescription),
             date: req.body.bookingDate,
             displayDate: formatDate(req.body.bookingDate),
             time: req.body.preferredTime,
