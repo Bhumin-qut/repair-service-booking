@@ -1,0 +1,12 @@
+name: Repair Service Booking
+
+on:
+ push:
+  branches:
+   -main
+
+jobs:
+ test:
+  name: Run Project
+  runs-on: self-hosted
+  strategy:
