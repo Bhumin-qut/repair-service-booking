@@ -30,7 +30,7 @@ Web application for booking device repairs. Customers create and track bookings.
 
 ---
 
-## 2. Tech stack
+## 2. What needs to install
 
 | Layer | Choice |
 |---|---|
@@ -125,21 +125,21 @@ If the `users` or `technicians` collections are empty, demo accounts are created
 
 ```
 Repair Service Booking/
-├── index.js                 # App bootstrap and MongoDB connect
+├── index.js              
 ├── package.json
-├── .env                     # Local secrets (gitignored)
+├── .env                   
 ├── db/
-│   └── config.js            # Connection, cookies, hash, seed
+│   └── config.js            
 ├── middelware/
-│   └── middelware.js        # requireCustomer / requireTechnician
+│   └── middelware.js        
 ├── helper/
-│   └── helperLib.js         # Dates, validators, view helpers
+│   └── helperLib.js         
 ├── route/
-│   ├── index.js             # Router
+│   ├── index.js             
 │   ├── user.controller.js
 │   ├── booking.controller.js
 │   └── technician.controller.js
-├── view/                    # EJS templates
+├── view/                    
 ├── public/
 │   ├── css/
 │   ├── js/
@@ -154,9 +154,9 @@ Repair Service Booking/
 CI/CD is out of scope. Manual deploy is enough.
 
 1. Launch an Ubuntu (or Amazon Linux) EC2 instance.
-2. Security group: allow **22** only from your IP; allow **80** (and **443** if you use HTTPS). Open **3000** only if you run the app on that port without a reverse proxy.
+2. Security group: allow **22** only from your IP; allow **80**. Open **3000** only if you run the app on that port without a reverse proxy.
 3. SSH in. Install Node.js 18+.
-4. Clone this repository. Run `npm install --omit=dev`.
+4. Clone this repository. Run `npm install`.
 5. Create `.env` on the server with `MONGODB_URI` and `MONGODB_DB`. Never commit `.env`.
 6. Start the process so it stays up during marking, for example:
 
@@ -166,7 +166,6 @@ pm2 start index.js --name repair-booking
 pm2 save
 pm2 startup
 ```
-7. Confirm the public URL in a browser using the demo accounts.
 ---
 
 ## 7. Known limitations
