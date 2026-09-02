@@ -1,8 +1,6 @@
 # Repair Service Booking
 
-Web application for booking device repairs. Customers create and track bookings. Technicians accept jobs, add notes, and mark repairs complete.
-
-**Repository:** https://github.com/Bhumin-qut/repair-service-booking.git  
+This is booking device repairs. Customers create and track bookings. Technicians accept jobs, add notes, and mark repairs complete.
 **Local URL:** http://localhost:3000  
 
 ---
