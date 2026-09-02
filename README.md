@@ -4,31 +4,28 @@ Web application for booking device repairs. Customers create and track bookings.
 
 **Repository:** https://github.com/Bhumin-qut/repair-service-booking.git  
 **Local URL:** http://localhost:3000  
-**Deployment URL:** http://54.252.69.77/login
 
 ---
 
 ## 1. Features
+### Authentication
+- Register, log in, log out
 
 ### Customer
-- Register, log in, log out
 - Create a repair booking (device, brand, service category, date, time, problem)
 - View booking history and booking details
 - Update or cancel a booking (pending or in progress)
-- Update profile (email is read-only)
 
 ### Technician
-- Log in, log out
-- Dashboard and job queue
+- Dashboard
 - Accept or reject a job
 - Update repair notes and mark a job complete
-- Update profile and optional photo (email is read-only)
 
 ### System
 - Role-based access (customer vs technician)
-- Guests and the wrong role are redirected to `/login`
+- the wrong role are redirected to `/login`
 - Data stored in MongoDB (`users`, `technicians`, `bookings`, `jobs`)
-- Client and server form validation
+- Client form validation
 - Seeded demo accounts on first empty database
 
 ---
@@ -39,11 +36,10 @@ Web application for booking device repairs. Customers create and track bookings.
 |---|---|
 | Runtime | Node.js |
 | Server | Express 5 |
-| Views | EJS (`view/` folder) |
-| UI | Bootstrap 5, Bootstrap Icons (served from `public/`) |
-| Database | MongoDB (native driver) |
-| Uploads | Multer (technician photos) |
-| Config | `dotenv` (`.env` is not committed) |
+| Views | EJS |
+| UI | Bootstrap 5, Bootstrap Icons |
+| Database | MongoDB |
+| Config | `dotenv` |
 
 ---
 
@@ -68,10 +64,10 @@ Browser
 ```
 
 - `index.js` loads environment variables, connects to MongoDB, then listens on port **3000**.
-- `route/index.js` maps URLs to controllers. Customer routes use `requireCustomer`. Technician routes use `requireTechnician`.
+- `route/index.js` maps URLs to controllers.
 - Auth uses HttpOnly cookies: `authEmail` and `authRole`.
-- Creating a booking inserts a **booking** (`status: pending`) and a **job** (`status: new`).
-- Technician accept / complete updates the related job (and booking status where implemented).
+- Creating a booking inserts a **booking** status is pending.
+- Technician accept / complete updates the related job.
 - Password hashes use PBKDF2. Do not commit `MONGODB_URI` or other secrets.
 
 ### Main routes
@@ -86,23 +82,17 @@ Browser
 | GET | `/bookings/:id` | customer | Details |
 | GET/POST | `/bookings/:id/edit` | customer | Update booking |
 | POST | `/bookings/:id/cancel` | customer | Cancel |
-| GET/POST | `/profile` | customer | Customer profile |
 | GET | `/technician/dashboard` | technician | Dashboard |
 | GET | `/technician/bookings` | technician | Job list |
 | POST | `/technician/bookings/:id/accept` | technician | Accept job |
-| POST | `/technician/bookings/:id/reject` | technician | Reject job |
 | GET/POST | `/technician/bookings/:id` | technician | View / update job |
-| GET/POST | `/technician/profile` | technician | Technician profile |
-
-End-to-end workflow: customer books repair → technician accepts → technician completes → customer sees **Completed**.
-
 ---
 
 ## 4. Local setup
 
 ### Prerequisites
 - Node.js 18 or later
-- A MongoDB Atlas cluster (or local MongoDB) and a connection string
+- A MongoDB Atlas cluster and a connection string
 
 ### Steps
 
@@ -112,15 +102,7 @@ cd repair-service-booking
 npm install
 ```
 
-Create a `.env` file in the project root (same folder as `package.json`). Do **not** commit this file.
-
-```
-MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/?retryWrites=true&w=majority
-MONGODB_DB=repair_service_booking
-```
-
 Start the app:
-
 ```bash
 npm start
 ```
@@ -184,13 +166,7 @@ pm2 start index.js --name repair-booking
 pm2 save
 pm2 startup
 ```
-
-7. Optional: put Nginx in front and proxy to `http://127.0.0.1:3000`.
-8. Confirm the public URL in a browser using the demo accounts.
-
-**Instance ID / name:**
-**Public URL:** 
-
+7. Confirm the public URL in a browser using the demo accounts.
 ---
 
 ## 7. Known limitations
@@ -198,18 +174,9 @@ pm2 startup
 - No payment or invoicing
 - Forgot-password screen does not send real email
 - No admin role
-- No automated test suite
-- Auth is cookie-based for this sample; not a full session/passport stack
-- Folder name `middelware` is spelled as in the repo
-- Seeded jobs are sample data; new customer bookings create matching jobs
-- Photo uploads are stored on disk under `public/uploads/technicians/` (not in MongoDB)
+- Auth is cookie-based for this sample, not a full session
+- Folder name `middelware` use for identify user role
+- Seeded jobs are sample data, new customer bookings create matching jobs
 - GitHub Actions workflow in this repo is not required for marking
 
 ---
-
-## 8. Assessment notes
-
-- Use feature branches named after Jira issues (for example `SCRUM-12-create-booking`).
-- Open a pull request and add a self-review comment before merge.
-- Tag the submitted release (for example `v1.0-assessment1`).
-- Keep Jira, Figma, design diagrams, commits, and this README consistent when a change request is made.
