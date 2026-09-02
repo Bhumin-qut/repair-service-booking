@@ -188,8 +188,8 @@ pm2 startup
 7. Optional: put Nginx in front and proxy to `http://127.0.0.1:3000`.
 8. Confirm the public URL in a browser using the demo accounts.
 
-**Instance ID / name:** _Fill from the AWS console._  
-**Public URL:** _Fill here and on the assessment cover page._
+**Instance ID / name:**
+**Public URL:** 
 
 ---
 
