@@ -7,18 +7,13 @@ async function getLoggedInUser(req) {
 
   if (!email || !role) {
     return null;
-  }
-
-  if (role === 'customer') {
+  }else if (role === 'customer') {
     const user = await getCollection('users').findOne({ email });
     return user ? { user, role } : null;
-  }
-
-  if (role === 'technician') {
+  }else if (role === 'technician') {
     const user = await getCollection('technicians').findOne({ email });
     return user ? { user, role } : null;
   }
-
   return null;
 }
 async function identifyUser(req, res, next, role) {

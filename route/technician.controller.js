@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { getCollection, hashPassword } = require('../db/config');
-const { timeAgo, trim, validateTechnicianProfile, validateJobUpdate } = require('../helper/helperLib');
+const { timeAgo, trim } = require('../helper/helperLib');
 
 const specializations = [
   'Laptop & PC Repair',
@@ -58,21 +58,6 @@ function deletePhotoFile(photoUrl) {
 }
 
 //technician
-function toTechnicianView(technician) {
-  return {
-    role: 'technician',
-    fullName: technician.fullName,
-    email: technician.email,
-    phone: technician.phone,
-    specialization: technician.specialization,
-    experience: technician.experience,
-    availability: technician.availability,
-    address: technician.address,
-    photoUrl: technician.photoUrl || ''
-  };
-}
-
-//technician
 function toAssignedJob(job) {
   return {
     id: job.id,
@@ -103,19 +88,8 @@ function toJobView(job) {
   };
 }
 
-// technician
-function technicianLocals(technician, extra) {
-  return Object.assign({ user: toTechnicianView(technician) }, extra);
-}
-
 //technician
-function jobsListPath(req) {
-  const referer = req.get('Referer') || '';
-  return referer.includes('/technician/dashboard') ? '/technician/dashboard' : '/technician/bookings';
-}
-
-//technician
-async function loadTechnicianJobs() {
+async function getTechnicianJobs() {
   return getCollection('jobs')
     .find({ status: { $ne: 'rejected' } })
     .sort({ createdAt: -1 })
@@ -126,7 +100,15 @@ async function loadTechnicianJobs() {
 function toJobLists(jobs) {
   const assignedJobs = jobs
     .filter((job) => ['new', 'in-progress', 'completed'].includes(job.status))
-    .map(toAssignedJob);
+    .map(job => ({
+      id: job.id,
+      status: job.status,
+      timeAgo: job.status === 'new' ? timeAgo(job.createdAt) : '',
+      customer: typeof job.customer === 'string' ? job.customer : (job.customer && job.customer.name) || '',
+      device: job.device || `${job.deviceBrand || ''} ${job.deviceName || ''}`.trim(),
+      issue: job.issue || job.reportedProblem || '',
+      location: job.location
+  }));
 
   const todaySchedule = jobs
     .filter((job) => job.schedule)
@@ -139,13 +121,23 @@ function toJobLists(jobs) {
 exports.getProfile = async (req, res) => {
   try {
     const technician = req.user;
-
-    return res.render('update-technician-profile', technicianLocals(technician, {
+    return res.render('update-technician-profile', 
+      { 
+        user:  {
+          role: 'technician',
+          fullName: technician.fullName,
+          email: technician.email,
+          phone: technician.phone,
+          specialization: technician.specialization,
+          experience: technician.experience,
+          availability: technician.availability,
+          address: technician.address,
+          photoUrl: technician.photoUrl || ''
+        }, 
       title: 'Update Technician Profile',
       currentPage: 'profile',
       specializations,
-      error: null
-    }));
+      error: null});
   } catch (error) {
     console.error('Load technician profile failed:', error);
     return res.status(500).send('Unable to load profile.');
@@ -167,26 +159,6 @@ exports.updateProfile = async (req, res) => {
       newPassword,
       confirmPassword
     } = req.body;
-
-    const profileError = validateTechnicianProfile(req.body, specializations);
-    if (profileError) {
-      if (req.file) {
-        deletePhotoFile(`/uploads/technicians/${req.file.filename}`);
-      }
-      return res.render('update-technician-profile', technicianLocals(Object.assign({}, technician, {
-        fullName: trim(fullName),
-        phone: trim(phone),
-        specialization,
-        experience: Number(experience),
-        availability,
-        address: trim(address)
-      }), {
-        title: 'Update Technician Profile',
-        currentPage: 'profile',
-        specializations,
-        error: profileError
-      }));
-    }
 
     const update = {
       fullName: trim(fullName) || technician.fullName,
@@ -223,16 +195,39 @@ exports.getBookings = async (req, res) => {
   try {
     const technician = req.user;
 
-    const jobs = await loadTechnicianJobs();
-    const { assignedJobs, todaySchedule } = toJobLists(jobs);
-
-    return res.render('technician-bookings', technicianLocals(technician, {
-      title: 'Technician Bookings',
-      currentPage: 'bookings',
-      todaySchedule,
-      assignedJobs,
-      newCount: assignedJobs.filter((job) => job.status === 'new').length
+    const jobs = await getTechnicianJobs();
+    const assignedJobs = jobs.filter((job) => ['new', 'in-progress', 'completed'].includes(job.status))
+      .map(job => ({
+        id: job.id,
+        status: job.status,
+        timeAgo: job.status === 'new' ? timeAgo(job.createdAt) : '',
+        customer: typeof job.customer === 'string' ? job.customer : (job.customer && job.customer.name) || '',
+        device: job.device || `${job.deviceBrand || ''} ${job.deviceName || ''}`.trim(),
+        issue: job.issue || job.reportedProblem || '',
+        location: job.location
     }));
+
+    const todaySchedule = jobs.filter((job) => job.schedule).map((job) => job.schedule);
+
+    return res.render('technician-bookings', 
+      { 
+        user:  {
+          role: 'technician',
+          fullName: technician.fullName,
+          email: technician.email,
+          phone: technician.phone,
+          specialization: technician.specialization,
+          experience: technician.experience,
+          availability: technician.availability,
+          address: technician.address,
+          photoUrl: technician.photoUrl || ''
+        },
+        title: 'Technician Bookings',
+        currentPage: 'bookings',
+        todaySchedule,
+        assignedJobs,
+        newCount: assignedJobs.filter((job) => job.status === 'new').length 
+      });
   } catch (error) {
     console.error('Load technician bookings failed:', error);
     return res.status(500).send('Unable to load bookings.');
@@ -271,8 +266,8 @@ exports.acceptJob = async (req, res) => {
         );
       }
     }
-
-    return res.redirect(jobsListPath(req));
+    const referer = req.get('Referer') || '';
+    return res.redirect(referer.includes('/technician/dashboard') ? '/technician/dashboard' : '/technician/bookings');
   } catch (error) {
     console.error('Accept job failed:', error);
     return res.status(500).send('Unable to accept job.');
@@ -298,8 +293,8 @@ exports.rejectJob = async (req, res) => {
         );
       }
     }
-
-    return res.redirect(jobsListPath(req));
+    const referer = req.get('Referer') || '';
+    return res.redirect(referer.includes('/technician/dashboard') ? '/technician/dashboard' : '/technician/bookings');
   } catch (error) {
     console.error('Reject job failed:', error);
     return res.status(500).send('Unable to reject job.');
@@ -316,13 +311,25 @@ exports.getJob = async (req, res) => {
       return res.status(404).send('Job not found');
     }
 
-    return res.render('update-repair-details', technicianLocals(technician, {
-      title: `Job #${job.id}`,
-      currentPage: 'bookings',
-      job: toJobView(job),
-      jobStatuses,
-      error: null
-    }));
+    return res.render('update-repair-details', 
+      {
+        user:  {
+          role: 'technician',
+          fullName: technician.fullName,
+          email: technician.email,
+          phone: technician.phone,
+          specialization: technician.specialization,
+          experience: technician.experience,
+          availability: technician.availability,
+          address: technician.address,
+          photoUrl: technician.photoUrl || ''
+        },
+        title: `Job #${job.id}`,
+        currentPage: 'bookings',
+        job: toJobView(job),
+        jobStatuses,
+        error: null
+      });
   } catch (error) {
     console.error('Load job failed:', error);
     return res.status(500).send('Unable to load job.');
@@ -339,17 +346,7 @@ exports.updateJob = async (req, res) => {
     }
 
     const allowedStatuses = jobStatuses.map((item) => item.value);
-    const jobError = validateJobUpdate(req.body, allowedStatuses);
-    if (jobError) {
-      return res.render('update-repair-details', technicianLocals(req.user, {
-        title: `Job #${job.id}`,
-        currentPage: 'bookings',
-        job: Object.assign({}, toJobView(job), { notes: req.body.notes, status: req.body.status || job.status }),
-        jobStatuses,
-        error: jobError
-      }));
-    }
-
+    
     const status = req.body.action === 'complete' ? 'completed' : req.body.status;
     await jobs.updateOne(
       { id: job.id },
@@ -381,25 +378,50 @@ exports.getDashboard = async (req, res) => {
   try {
     const technician = req.user;
 
-    const jobs = await loadTechnicianJobs();
-    const { assignedJobs, todaySchedule } = toJobLists(jobs);
+    const jobs = await getTechnicianJobs();
+
+    const assignedJobs = jobs.filter((job) => ['new', 'in-progress', 'completed'].includes(job.status))
+      .map(job => ({
+        id: job.id,
+        status: job.status,
+        timeAgo: job.status === 'new' ? timeAgo(job.createdAt) : '',
+        customer: typeof job.customer === 'string' ? job.customer : (job.customer && job.customer.name) || '',
+        device: job.device || `${job.deviceBrand || ''} ${job.deviceName || ''}`.trim(),
+        issue: job.issue || job.reportedProblem || '',
+        location: job.location
+    }));
+
+    const todaySchedule = jobs.filter((job) => job.schedule).map((job) => job.schedule);
+
     const newJobs = assignedJobs.filter((job) => job.status === 'new');
     const inProgressJobs = assignedJobs.filter((job) => job.status === 'in-progress');
     const completedJobs = assignedJobs.filter((job) => job.status === 'completed');
 
-    return res.render('technician-dashboard', technicianLocals(technician, {
-      title: 'Technician Dashboard',
-      currentPage: 'dashboard',
-      stats: {
-        newCount: newJobs.length,
-        inProgressCount: inProgressJobs.length,
-        completedCount: completedJobs.length,
-        scheduleCount: todaySchedule.length
-      },
-      todaySchedule,
-      newJobs,
-      activeJobs: inProgressJobs.slice(0, 4)
-    }));
+    return res.render('technician-dashboard', 
+      {
+        user:  {
+          role: 'technician',
+          fullName: technician.fullName,
+          email: technician.email,
+          phone: technician.phone,
+          specialization: technician.specialization,
+          experience: technician.experience,
+          availability: technician.availability,
+          address: technician.address,
+          photoUrl: technician.photoUrl || ''
+        },
+        title: 'Technician Dashboard',
+        currentPage: 'dashboard',
+        stats: {
+          newCount: newJobs.length,
+          inProgressCount: inProgressJobs.length,
+          completedCount: completedJobs.length,
+          scheduleCount: todaySchedule.length
+        },
+        todaySchedule,
+        newJobs,
+        activeJobs: inProgressJobs.slice(0, 4)
+      });
   } catch (error) {
     console.error('Load technician dashboard failed:', error);
     return res.status(500).send('Unable to load dashboard.');

@@ -1,5 +1,5 @@
 const { getCollection } = require('../db/config');
-const { formatDate, formatTime, toCustomerView, trim, validateCreateBooking, validateUpdateBooking } = require('../helper/helperLib');
+const { formatDate, formatTime, trim } = require('../helper/helperLib');
 
 const brands = [
   'Apple',
@@ -37,19 +37,6 @@ const timeSlots = [
 ];
 
 //customer
-function canEdit(booking) {
-  return booking && (booking.status === 'pending' || booking.status === 'in-progress');
-}
-
-//customer
-function authLocals(user, extra) {
-  return Object.assign(
-    { user: toCustomerView(user), currentPage: 'bookings' },
-    extra
-  );
-}
-
-//customer
 exports.getCreateBooking = async (req, res) => {
   try {
     const user = req.user;
@@ -57,7 +44,14 @@ exports.getCreateBooking = async (req, res) => {
     return res.render('create-booking', {
       title: 'Create New Booking',
       currentPage: 'book-repair',
-      user: toCustomerView(user),
+      user: {
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        address: user.address
+      },
       brands,
       categories,
       error: null,
@@ -83,18 +77,22 @@ exports.createBooking = async (req, res) => {
       problemDescription
     } = req.body;
 
-    const bookingError = validateCreateBooking(req.body, brands, categories);
-    if (bookingError) {
-      return res.render('create-booking', {
-        title: 'Create New Booking',
-        currentPage: 'book-repair',
-        user: toCustomerView(user),
-        brands,
-        categories,
-        error: bookingError,
-        values: req.body
-      });
-    }
+   
+    return res.render('create-booking', {
+      title: 'Create New Booking',
+      currentPage: 'book-repair',
+      user: {
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        address: user.address
+      },
+      brands,
+      categories,
+      values: req.body
+    });
 
     const bookingId = `REP-${Math.floor(1000 + Math.random() * 9000)}`;
     const booking = {
@@ -141,10 +139,19 @@ exports.getBookings = async (req, res) => {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return res.render('booking-history', authLocals(user, {
-      title: 'Booking History',
-      bookings
-    }));
+    return res.render('booking-history', { 
+        user: {
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address
+        }, 
+        currentPage: 'bookings',
+        title: 'Booking History',
+        bookings
+      });
   } catch (error) {
     console.error('Load bookings failed:', error);
     return res.status(500).send('Unable to load bookings.');
@@ -165,11 +172,20 @@ exports.getBooking = async (req, res) => {
       return res.status(404).send('Booking not found');
     }
 
-    return res.render('view-booking', authLocals(user, {
-      title: `Booking #${booking.id}`,
-      booking,
-      canEdit: canEdit(booking)
-    }));
+    return res.render('view-booking',{ 
+      user: {
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address
+        }, 
+        currentPage: 'bookings',
+        title: `Booking #${booking.id}`,
+        booking,
+        canEdit: booking && (booking.status === 'pending' || booking.status === 'in-progress')
+    });
   } catch (error) {
     console.error('Load booking failed:', error);
     return res.status(500).send('Unable to load booking.');
@@ -190,16 +206,25 @@ exports.getUpdateBooking = async (req, res) => {
       return res.status(404).send('Booking not found');
     }
 
-    if (!canEdit(booking)) {
+    if (!(booking && (booking.status === 'pending' || booking.status === 'in-progress'))) {
       return res.redirect(`/bookings/${booking.id}`);
     }
 
-    return res.render('update-booking', authLocals(user, {
-      title: `Update Booking #${booking.id}`,
-      booking,
-      timeSlots,
-      error: null
-    }));
+    return res.render('update-booking',{ 
+      user: {
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address
+        }, 
+        currentPage: 'bookings',
+         title: `Update Booking #${booking.id}`,
+          booking,
+          timeSlots,
+          error: null
+    });
   } catch (error) {
     console.error('Load update booking failed:', error);
     return res.status(500).send('Unable to load booking.');
@@ -220,21 +245,26 @@ exports.updateBooking = async (req, res) => {
       return res.status(404).send('Booking not found');
     }
 
-    const updateError = validateUpdateBooking(req.body, timeSlots);
-    if (updateError) {
-      return res.render('update-booking', authLocals(user, {
-        title: `Update Booking #${booking.id}`,
-        booking: Object.assign({}, booking, {
-          problemDescription: req.body.problemDescription,
-          date: req.body.bookingDate,
-          time: req.body.preferredTime
-        }),
-        timeSlots,
-        error: updateError
-      }));
-    }
+      return res.render('update-booking',{ 
+          user: {
+              username: user.username,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              phone: user.phone,
+              address: user.address
+            }, 
+            currentPage: 'bookings',
+            title: `Update Booking #${booking.id}`,
+            booking: Object.assign({}, booking, {
+              problemDescription: req.body.problemDescription,
+              date: req.body.bookingDate,
+              time: req.body.preferredTime
+            }),
+            timeSlots,
+        });
 
-    if (canEdit(booking)) {
+    if (booking && (booking.status === 'pending' || booking.status === 'in-progress')) {
       await getCollection('bookings').updateOne(
         { id: booking.id },
         {
@@ -266,7 +296,7 @@ exports.cancelBooking = async (req, res) => {
       customerEmail: user.email
     });
 
-    if (booking && canEdit(booking)) {
+    if (booking && (booking.status === 'pending' || booking.status === 'in-progress')) {
       await getCollection('bookings').updateOne(
         { id: booking.id },
         { $set: { status: 'cancelled', updatedAt: new Date() } }

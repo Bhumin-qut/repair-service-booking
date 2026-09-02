@@ -5,7 +5,7 @@ const {
   setAuthCookies,
   clearAuthCookies
 } = require('../db/config');
-const { toCustomerView, validateLogin, validateRegister, validateForgotPassword, validateCustomerProfile, trim } = require('../helper/helperLib');
+const { trim } = require('../helper/helperLib');
 
 //customer and technician
 async function findAccountByEmail(email) {
@@ -32,10 +32,6 @@ exports.postLogin = async (req, res) => {
   try {
     const email = (req.body.email || '').trim().toLowerCase();
     const password = req.body.password || '';
-    const loginError = validateLogin({ email, password });
-    if (loginError) {
-      return res.render('login', { title: 'Sign In', error: loginError });
-    }
     const { account, role } = await findAccountByEmail(email);
 
     if (!account || !verifyPassword(password, account.passwordHash)) {
@@ -75,14 +71,6 @@ exports.postRegister = async (req, res) => {
       address
     } = req.body;
     const values = { username, email, firstName, lastName, phone, address };
-    const registerError = validateRegister(req.body);
-    if (registerError) {
-      return res.render('register', {
-        title: 'Create an Account',
-        error: registerError,
-        values
-      });
-    }
 
     const users = getCollection('users');
     const normalizedEmail = (email || '').trim().toLowerCase();
@@ -130,16 +118,6 @@ exports.getForgotPassword = (req, res) => {
 exports.sendResetLink = async (req, res) => {
   try {
     const email = (req.body.email || '').trim().toLowerCase();
-    const forgotError = validateForgotPassword({ email });
-    if (forgotError) {
-      return res.render('forgot-password', {
-        title: 'Forgot Password',
-        sent: false,
-        error: forgotError,
-        email
-      });
-    }
-
     const { account, role } = await findAccountByEmail(email);
 
     if (account) {
@@ -173,7 +151,14 @@ exports.getProfile = async (req, res) => {
     return res.render('update-profile', {
       title: 'Update Profile',
       currentPage: 'profile',
-      user: toCustomerView(user),
+      user: {
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address
+        },
       error: null
     });
   } catch (error) {
@@ -187,21 +172,6 @@ exports.updateProfile = async (req, res) => {
   try {
     const user = req.user;
     const { firstName, lastName, phone, address, newPassword, confirmPassword } = req.body;
-    const profileError = validateCustomerProfile(req.body);
-    if (profileError) {
-      return res.render('update-profile', {
-        title: 'Update Profile',
-        currentPage: 'profile',
-        error: profileError,
-        user: Object.assign({}, toCustomerView(user), {
-          firstName: trim(firstName),
-          lastName: trim(lastName),
-          phone: trim(phone),
-          address: trim(address)
-        })
-      });
-    }
-
     const update = {
       firstName: trim(firstName),
       lastName: trim(lastName),
