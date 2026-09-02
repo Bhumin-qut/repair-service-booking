@@ -4,7 +4,7 @@ Web application for booking device repairs. Customers create and track bookings.
 
 **Repository:** https://github.com/Bhumin-qut/repair-service-booking.git  
 **Local URL:** http://localhost:3000  
-**Deployment URL:** _Add your public EC2 URL here after deploy (for example `http://x.x.x.x:3000`)._
+**Deployment URL:** http://54.252.69.77/login
 
 ---
 
